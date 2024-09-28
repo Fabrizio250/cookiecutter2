@@ -19,13 +19,13 @@ captum
 torchmetrics
 kornia
 jupyter
-fastapi
+fastapi ==0.73.0
 pytorch_lightning
 starlette
 pydantic
 scikit-learn
 celery
-uvicorn
+uvicorn==0.17.0
 redis
 python-multipart
 nibabel
@@ -34,4 +34,4 @@ user-agents
 nibabel
 ua-parser
 locust
-prometheus-instrumentator
+prometheus-instrumentator==1.8.0
