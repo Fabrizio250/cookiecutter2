@@ -221,6 +221,21 @@ def get_package_info(package_name):
             'Requirements': 'unknown',
             'Verification Reasoning': 'unknown'
         }
+    except Exception as e:
+        # Gestire altri errori
+        print(f"Errore durante il recupero delle informazioni per {package_name}: {e}")
+        info = {
+            'ID': 'unknown',
+            'Software System': 'Unknown',
+            'Package Name': package_name,
+            'Programming Language': 'Unknown',
+            'Version': 'unknown',
+            'Website': 'unknown',
+            'Last verified at': 'Unknown',
+            'Risk Level': 'unknown',
+            'Requirements': 'unknown',
+            'Verification Reasoning': 'unknown'
+        }
     return info
 
 
