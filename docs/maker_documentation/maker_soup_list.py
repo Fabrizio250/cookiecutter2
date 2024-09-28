@@ -319,6 +319,3 @@ def run_soup_list():
     template_path_soup = '../source/template_docs/soup_list_template.md'
     output_md_path_soup = '../md_docs/soup-list.md'
     generate_soup_list_md(soup_list, template_path_soup, output_md_path_soup)
-
-
-7
