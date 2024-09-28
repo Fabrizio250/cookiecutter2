@@ -34,4 +34,3 @@ user-agents
 nibabel
 ua-parser
 locust
-prometheus-instrumentator==1.8.0
