@@ -1,0 +1,17 @@
+mlflow
+dvc
+ruff
+codecarbon
+pytest
+pynblint
+bandit
+mypy
+deepchecks
+numpy
+scipy
+seaborn
+jinja2
+pandas
+requests
+matplotlib
+
