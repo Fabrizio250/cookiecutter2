@@ -1,0 +1,74 @@
+name: Quality Check
+
+on:
+  # push:
+  release:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  PYTHON_VERSION: 3.10.9
+
+jobs:
+
+  create_virtualenv:
+    name: Create environment
+    # runs-on: ubuntu-latest
+    runs-on: self-hosted
+
+    steps:
+    
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: pip cache
+        id: pip-cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ env.pythonLocation }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Setup venv (no cache hit)
+        if: steps.pip-cache.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+  lint:
+    name: Linting
+    runs-on: self-hosted
+    needs: create_virtualenv
+
+    steps:
+                    
+    - name: Linting with pylint
+      run: |
+        pylint pylint --fail-under=8 $(git ls-files '*.py')
+
+  test_unmarked:
+    name: Tests unmarked
+    needs: create_virtualenv
+    runs-on: self-hosted
+
+    steps:
+
+    - name: Testing with pytest
+      run: |
+        pytest -m "not require_data and not require_scans and not require_model"
+
+  test_marked:
+    name: Tests marked
+    if: ${{ github.event.issue.pull_request }} || ${{ github.event.issue.release }}
+    needs: test_unmarked
+    runs-on: self-hosted
+
+    steps:
+
+    - name: Testing with pytest
+      run: |
+        pytest -m "not require_model"

@@ -1,0 +1,4 @@
+outs:
+- md5: 16e542c79703ff9b8cd5dc862951b671
+  size: 3240
+  path: clinical-map.json

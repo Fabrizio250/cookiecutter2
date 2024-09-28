@@ -1,0 +1,36 @@
+stages:
+  make_dataset:
+    cmd: python src/data/make_dataset.py data/external/OASIS3_MRI_SESSIONS/ data/external/OASIS3_MRI_FREESURFER/
+      data/processed/ data/raw/clinical-data.csv data/raw/mri-scans.csv
+    deps:
+    - data/external/OASIS3_MRI_FREESURFER/
+    - data/external/OASIS3_MRI_SESSIONS/
+    - data/raw/clinical-data.csv
+    - data/raw/mri-scans.csv
+    - src/data/make_dataset.py
+    outs:
+    - data/processed/clinical-mr-full.csv
+    - data/processed/clinical-mr.csv
+    - data/processed/data/
+    - data/processed/invalid-sessions.csv
+
+  train_model:
+    cmd: python -m src.models.train_model 
+      --diagnosis_dict data/raw/clinical-map.json 
+      --clinical_data data/processed/clinical-mr-full.csv
+      --data_folder data/processed/data/
+      --max_epochs 1 
+      --seed 42  
+      --batch_size 1 
+      --precision 16 
+      --accumulate_grad_batches 8
+      --mlflow_uri https://dagshub.com/v.longo20/3dConvAD.mlflow
+    deps:
+      - data/raw/clinical-map.json
+      - data/processed/clinical-mr-full.csv
+      - data/processed/data/
+      - src/models/train_model.py
+    outs:
+      - models/model.ckpt:
+          persist: true
+

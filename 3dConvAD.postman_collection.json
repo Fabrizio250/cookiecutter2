@@ -1,0 +1,336 @@
+{
+	"info": {
+		"_postman_id": "361775a0-0711-4bca-9174-aba0e7e6a28e",
+		"name": "3dConvAD Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24992595"
+	},
+	"item": [
+		{
+			"name": "Predict correct data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Correct post\", function(){",
+							"    pm.response.to.have.status(202);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"task_id\", jsonData.task_id);",
+							"",
+							"setTimeout(function(){}, [10000]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "brainscan",
+							"type": "file",
+							"src": "data/raw/sample_data/OAS30001_MR_d0129_T1w.nii.gz"
+						},
+						{
+							"key": "brainmask",
+							"type": "file",
+							"src": "data/raw/sample_data/OAS30001_MR_d0129_brainmask.mgz"
+						},
+						{
+							"key": "n_iter",
+							"value": "{{n_iter}}",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://api.dev.trendatre3.duckdns.org/predict",
+					"protocol": "http",
+					"host": [
+						"api",
+						"dev",
+						"trendatre3",
+						"duckdns",
+						"org"
+					],
+					"path": [
+						"predict"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Task status immediate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Immediate status\", function(){",
+							"    pm.response.to.have.status(202);",
+							"});",
+							"",
+							"pm.test(\"Result not ready\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.value).to.eql(undefined);",
+							"});",
+							"",
+							"setTimeout(function(){}, [120000]);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://api.dev.trendatre3.duckdns.org/predict/{{task_id}}",
+					"protocol": "http",
+					"host": [
+						"api",
+						"dev",
+						"trendatre3",
+						"duckdns",
+						"org"
+					],
+					"path": [
+						"predict",
+						"{{task_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Task status Deferred",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Correct post\", function(){",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Body matches string\", function () {",
+							"    pm.response.to.have.jsonBody(\"result_url\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://api.dev.trendatre3.duckdns.org/predict/{{task_id}}",
+					"protocol": "http",
+					"host": [
+						"api",
+						"dev",
+						"trendatre3",
+						"duckdns",
+						"org"
+					],
+					"path": [
+						"predict",
+						"{{task_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PredictionResults",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Correct iterations\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var n_iter = parseInt(pm.environment.get(\"n_iter\"));",
+							"    pm.expect(jsonData.attribution.iterations).to.eql(n_iter);",
+							"",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://api.dev.trendatre3.duckdns.org/results/{{task_id}}",
+					"protocol": "http",
+					"host": [
+						"api",
+						"dev",
+						"trendatre3",
+						"duckdns",
+						"org"
+					],
+					"path": [
+						"results",
+						"{{task_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AttributionFile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Content-Type is correct\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/octet-stream\");",
+							"});",
+							"",
+							"pm.test(\"File have size\", function () {",
+							"    var content_len = parseInt(pm.response.headers.get(\"content-length\"));",
+							"    pm.expect(content_len).to.be.above(0);",
+							"",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://api.dev.trendatre3.duckdns.org/results/{{task_id}}/files/attribution",
+					"protocol": "http",
+					"host": [
+						"api",
+						"dev",
+						"trendatre3",
+						"duckdns",
+						"org"
+					],
+					"path": [
+						"results",
+						"{{task_id}}",
+						"files",
+						"attribution"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ProcessedFile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Content-Type is correct\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/octet-stream\");",
+							"});",
+							"",
+							"pm.test(\"File have size\", function () {",
+							"    var content_len = parseInt(pm.response.headers.get(\"content-length\"));",
+							"    pm.expect(content_len).to.be.above(0);",
+							"",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://api.dev.trendatre3.duckdns.org/results/{{task_id}}/files/processed",
+					"protocol": "http",
+					"host": [
+						"api",
+						"dev",
+						"trendatre3",
+						"duckdns",
+						"org"
+					],
+					"path": [
+						"results",
+						"{{task_id}}",
+						"files",
+						"processed"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Predict wrong data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Wrong post\", function(){",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "brainscan",
+							"type": "file",
+							"src": "/home/valerio/PycharmProjects/3dConvAD/data/raw/sample_data/OAS30001_MR_d0129_T1w.nii.gz"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://api.dev.trendatre3.duckdns.org/predict",
+					"protocol": "http",
+					"host": [
+						"api",
+						"dev",
+						"trendatre3",
+						"duckdns",
+						"org"
+					],
+					"path": [
+						"predict"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

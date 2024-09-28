@@ -1,0 +1,63 @@
+name: Critical Issues Check v3.0
+
+on:
+  release:
+  pull_request:
+  schedule:
+    - cron:  '30 5,17 * * *'
+  workflow_dispatch:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  critical_issues:
+    runs-on: [self-hosted]
+    outputs:
+      issues-found: ${{ steps.find-critical-issues.outputs.issues-found }}
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: find-critical-issues
+      id: find-critical-issues
+
+      uses: actions-cool/issues-helper@v3
+      with:
+        actions: 'find-issues'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issue-state: 'open'
+        labels: 'critical, critical-issue, urgent, important, blocking'
+
+    - name: issues-not-found
+      if: ${{ steps.find-critical-issues.outputs.issues-found }} == ''
+      run: |
+          echo "There are no critical issues."
+          echo "The list of critical issues is: ${{ steps.find-critical-issues.outputs.issues-found }}"
+
+
+    - name: Make folder
+      id: make-folder
+      if: ${{ steps.find-critical-issues.outputs }} != ''
+      run: |
+          mkdir -p logs/$(date)_logs && touch logs/$(date)_logs/log.txt
+
+    - name: issues-found
+      if: ${{ steps.find-critical-issues.outputs.issues-found }} != ''
+      run: |
+          echo "Critical issues have been found."
+          echo "The list of critical issues is: ${{ steps.find-critical-issues.outputs.issues-found }}"
+
+    - name: Upload artifact
+      id: artifact-upload
+      uses: actions/upload-artifact@v3
+      with:
+          name: critical_issues-$(date +'%Y-%m-%dT%H:%M:%S')
+          path: |
+            logs
+            !logs/**/*.txt
+
+
+

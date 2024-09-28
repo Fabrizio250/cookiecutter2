@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='semantic.min.css') }}"/>
+    <title>3DConvAD</title>
+</head>
+<body>
+<h1 class="ui center aligned icon header">
+        <img src="{{ url_for('static', filename='logo.svg') }}" alt="logo"/>
+    <div class="content">
+        3dConvAD
+        <div class="sub header">  Alzheimer's Disease detection tool</div>
+    </div>
+</h1>
+<div class="ui container segment">
+    <form class="ui form" method="post" action="" enctype="multipart/form-data" id="predict-form">
+        <div class="required field">
+            <label>Brainscan file</label>
+            <input type="file" id="brainscan" name="brainscan" required>
+        </div>
+        <div class="field">
+            <label>Brainmask file</label>
+            <input type="file" id="brainmask" name="brainmask">
+        </div>
+        <div class="field">
+            <label>Gradient calculation iterations</label>
+            <input type="number" min="1" max="50" value="1" id="n_iter" name="n_iter">
+        </div>
+
+        <button class="ui button primary" type="button" id="submit_btn">Predict</button>
+
+        <div class="ui message error">
+            <div class="content">
+                <div class="header">Error in uploading files</div>
+                <p id="error-message">Error</p>
+            </div>
+        </div>
+        <div class="ui message success" id="success-message">
+            <div class="header">Files uploaded correctly</div>
+        </div>
+    </form>
+    <div class="ui clearing icon message hidden" id="status-box">
+        <i class="notched circle loading icon" id="loading-button"></i>
+        <div class="content">
+            <div class="content">
+                <h3 class="header">
+                    Just one second
+                </h3>
+                  <p>We're predicting for you.</p>
+            </div>
+
+              </div>
+            <a class="ui right red label" id="status-label">Processing</a>
+            <div class="ui right floated animated button" tabindex="0" id="refresh-button">
+                <div class="visible content">Refresh</div>
+                <div class="hidden content">
+                    <i class="sync icon"></i>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="ui container segment" id="result-box" style="display:none">
+    <p hidden id="task-id"></p>
+    <div class="ui statistics">
+        <div class="statistic">
+            <div class="value" id="ad-probability">
+            </div>
+            <div class="label">
+                Alzheimer's probability
+            </div>
+        </div>
+        <div class="statistic" id="ad-class">
+            <div class="text value" id="ad-positivity">
+            </div>
+            <div class="label">
+                Alzheimer's positivity
+            </div>
+        </div>
+    </div>
+    <div class="ui divider"></div>
+    <h3 class="header">Downloadable</h3>
+
+    <div class="ui aligned divided list">
+        <div class="item">
+            <div class="right floated content">
+                <a id="processed-dl" class="ui icon button" href="#"><i class="download icon"></i></a>
+
+            </div>
+            <div class="content">
+                <h4 class="header">Processed brainscan</h4>
+            </div>
+        </div>
+        <div class="item">
+            <div class="right floated content">
+                <a id="attribution-dl" class="ui icon button" href="#"><i class="download icon"></i> </a>
+
+            </div>
+            <div class="content">
+                <h4 class="header"> Attribution gradients</h4>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{{ url_for('static', filename='jquery-3.6.1.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='semantic.min.js') }}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var status_url = undefined;
+        var result_url = undefined;
+
+        $("#submit_btn").click(function () {
+            $("#predict-form").removeClass("success error");
+            $("#result-box").hide();
+
+            var form = new FormData($('#predict-form')[0]);
+            var brainmask = $("#brainmask").val();
+            if (brainmask === "") {
+                form.delete("brainmask");
+            }
+            $.post({
+                url: "{{ predict_endpoint }}",
+                data: form,
+                processData: false,
+                mimeType: "multipart/form-data",
+                contentType: false,
+                crossDomain: true,
+                success: function (data) {
+                    $("#predict-form").addClass("success");
+                    $("#status-box").removeClass("hidden");
+                    $("#status-box").addClass("visible");
+                    status_url = JSON.parse(data).status_url;
+                },
+                error: function (data) {
+                    $("#predict-form").addClass("error");
+                    $("#error-message").text(JSON.stringify(data));
+                }
+            });
+        });
+
+        $("#task-id").on('DOMSubtreeModified', function(){
+            $.get({
+                dataType: "json",
+                url: result_url,
+                success: function (res) {
+                    $("#ad-probability").text(res.prediction.predicted_probability.toFixed(2));
+                    $("#processed-dl").attr("href", res.processed.file_url);
+                    $("#attribution-dl").attr("href", res.attribution.file_url);
+
+                    if (res.prediction.predicted_class == "1"){
+                        $("#ad-positivity").text("Positive");
+                        $("#ad-class").addClass("red");
+                    }
+                    else{
+                        $("#ad-positivity").text("Negative");
+                        $("#ad-class").addClass("green");
+                    }
+
+
+                }
+            });
+        });
+
+        $("#refresh-button").click(function () {
+            $.get({
+                dataType: "json",
+                url: status_url,
+                success: function (data, textStatus, xhr) {
+                    $("#status-label").text(data.message)
+                    if (xhr.status === 200) {
+                        $("#status-label").removeClass("red");
+                        $("#status-label").addClass("green");
+                        $("#refresh-button").addClass("disabled");
+                        $("#loading-button").removeClass("loading");
+                        result_url = data.result_url;
+                        $("#task-id").text(data.task_id);
+                        $("#result-box").show();
+                    }
+                }
+            });
+        });
+
+        });
+</script>
+
+</body>
+</html>

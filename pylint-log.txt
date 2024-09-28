@@ -1,0 +1,54 @@
+
+❯ pylint src
+************* Module src.models.utils.transformations
+src/models/utils/transformations.py:5:0: E0401: Unable to import 'kornia.augmentation' (import-error)
+************* Module src.models.mri_classifier
+src/models/mri_classifier.py:84:4: W0221: Number of parameters was 3 in 'LightningModule.forward' and is now 2 in overridden 'MRIClassifier.forward' method (arguments-differ)
+src/models/mri_classifier.py:84:4: W0221: Variadics removed in overridden 'MRIClassifier.forward' method (arguments-differ)
+src/models/mri_classifier.py:97:4: W0221: Number of parameters was 3 in 'LightningModule.training_step' and is now 3 in overridden 'MRIClassifier.training_step' method (arguments-differ)
+src/models/mri_classifier.py:97:4: W0221: Variadics removed in overridden 'MRIClassifier.training_step' method (arguments-differ)
+src/models/mri_classifier.py:97:35: W0613: Unused argument 'batch_idx' (unused-argument)
+src/models/mri_classifier.py:113:4: W0221: Number of parameters was 3 in 'LightningModule.validation_step' and is now 3 in overridden 'MRIClassifier.validation_step' method (arguments-differ)
+src/models/mri_classifier.py:113:4: W0221: Variadics removed in overridden 'MRIClassifier.validation_step' method (arguments-differ)
+src/models/mri_classifier.py:113:37: W0613: Unused argument 'batch_idx' (unused-argument)
+src/models/mri_classifier.py:127:4: W0221: Number of parameters was 3 in 'LightningModule.test_step' and is now 3 in overridden 'MRIClassifier.test_step' method (arguments-differ)
+src/models/mri_classifier.py:127:4: W0221: Variadics removed in overridden 'MRIClassifier.test_step' method (arguments-differ)
+src/models/mri_classifier.py:127:31: W0613: Unused argument 'batch_idx' (unused-argument)
+************* Module src.data.make_dataset
+src/data/make_dataset.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+src/data/make_dataset.py:93:0: R0914: Too many local variables (18/15) (too-many-locals)
+src/data/make_dataset.py:173:4: C0103: Constant name "log_fmt" doesn't conform to UPPER_CASE naming style (invalid-name)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'source_mr' in function call (no-value-for-parameter)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'source_freesurf' in function call (no-value-for-parameter)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'output_directory' in function call (no-value-for-parameter)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'clinical_data' in function call (no-value-for-parameter)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'mr_sessions' in function call (no-value-for-parameter)
+
+------------------------------------------------------------------
+Your code has been rated at 9.22/10 (previous run: 8.68/10, +0.53)************* Module src.models.utils.transformations
+src/models/utils/transformations.py:5:0: E0401: Unable to import 'kornia.augmentation' (import-error)
+************* Module src.models.mri_classifier
+src/models/mri_classifier.py:84:4: W0221: Number of parameters was 3 in 'LightningModule.forward' and is now 2 in overridden 'MRIClassifier.forward' method (arguments-differ)
+src/models/mri_classifier.py:84:4: W0221: Variadics removed in overridden 'MRIClassifier.forward' method (arguments-differ)
+src/models/mri_classifier.py:97:4: W0221: Number of parameters was 3 in 'LightningModule.training_step' and is now 3 in overridden 'MRIClassifier.training_step' method (arguments-differ)
+src/models/mri_classifier.py:97:4: W0221: Variadics removed in overridden 'MRIClassifier.training_step' method (arguments-differ)
+src/models/mri_classifier.py:97:35: W0613: Unused argument 'batch_idx' (unused-argument)
+src/models/mri_classifier.py:113:4: W0221: Number of parameters was 3 in 'LightningModule.validation_step' and is now 3 in overridden 'MRIClassifier.validation_step' method (arguments-differ)
+src/models/mri_classifier.py:113:4: W0221: Variadics removed in overridden 'MRIClassifier.validation_step' method (arguments-differ)
+src/models/mri_classifier.py:113:37: W0613: Unused argument 'batch_idx' (unused-argument)
+src/models/mri_classifier.py:127:4: W0221: Number of parameters was 3 in 'LightningModule.test_step' and is now 3 in overridden 'MRIClassifier.test_step' method (arguments-differ)
+src/models/mri_classifier.py:127:4: W0221: Variadics removed in overridden 'MRIClassifier.test_step' method (arguments-differ)
+src/models/mri_classifier.py:127:31: W0613: Unused argument 'batch_idx' (unused-argument)
+************* Module src.data.make_dataset
+src/data/make_dataset.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+src/data/make_dataset.py:93:0: R0914: Too many local variables (18/15) (too-many-locals)
+src/data/make_dataset.py:173:4: C0103: Constant name "log_fmt" doesn't conform to UPPER_CASE naming style (invalid-name)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'source_mr' in function call (no-value-for-parameter)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'source_freesurf' in function call (no-value-for-parameter)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'output_directory' in function call (no-value-for-parameter)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'clinical_data' in function call (no-value-for-parameter)
+src/data/make_dataset.py:183:4: E1120: No value for argument 'mr_sessions' in function call (no-value-for-parameter)
+
+------------------------------------------------------------------
+Your code has been rated at 9.22/10 (previous run: 9.22/10, +0.00)
+

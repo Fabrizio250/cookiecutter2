@@ -1,0 +1,20 @@
+services:
+  redis:
+    image: "redis"
+    platform: linux/arm64
+
+  frontend:
+    image: valeriolong/frontend
+    platform: linux/arm64
+    environment:
+      - API_URL=http://api.3dconvad.trendatre3.duckdns.org/
+    ports:
+      - "5002:5000"
+
+  backend:
+    image: valeriolong/backend
+    platform: linux/arm64
+    depends_on:
+      - redis
+    ports:
+      - "8002:8000"

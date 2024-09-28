@@ -1,0 +1,60 @@
+services:
+  redis:
+    image: "redis"
+    platform: linux/amd64
+    volumes:
+      - /data/redis:/data
+    command:
+      - "--save 60 1"
+      - "--loglevel warning"
+
+  gateway:
+    image: "prom/pushgateway"
+
+  node:
+    image: "prom/node-exporter"
+
+  frontend:
+    image: valeriolong/frontend
+    platform: linux/amd64
+    build: src/app/frontend
+    environment:
+      - API_URL=http://127.0.0.1:8000/
+    ports:
+      - "5000:5000"
+
+  backend:
+    image: valeriolong/backend
+    platform: linux/amd64
+    build:
+      context: src/app/backend
+      secrets:
+      - ML_FLOW_PASSWORD
+      - ML_FLOW_USERNAME
+    depends_on:
+      - redis
+    ports:
+      - "8000:8000"
+    volumes:
+      - /data:/data
+
+  flower:
+    depends_on:
+      - backend
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/:/etc/prometheus/
+
+secrets:
+  ML_FLOW_USERNAME:
+    file: ./src/app/backend/user.local
+  ML_FLOW_PASSWORD:
+    file: ./src/app/backend/psw.local
+

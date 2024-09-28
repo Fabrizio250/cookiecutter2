@@ -1,0 +1,76 @@
+name: Deploy
+on:
+  workflow_dispatch:
+  
+jobs:
+ Staging:
+  runs-on: self-hosted
+  steps:
+    - name: Deploy to Staging server
+      uses: easingthemes/ssh-deploy@main
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
+        ARGS: "-rltgoDzvO"
+        REMOTE_PORT: ${{ secrets.DEPLOY_SERVER_PORT }}
+        REMOTE_HOST: ${{ secrets.DEPLOY_SERVER_HOST }}
+        REMOTE_USER: ${{ secrets.DEPLOY_SERVER_USERNAME }}
+        TARGET: "~/3dconvad/"
+        
+    - name: Clean Staging
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: docker compose -p stage -f 3dconvad/docker-compose.stage.yml down --remove-orphans
+        host: ${{ secrets.DEPLOY_SERVER_HOST }}
+        username: ${{ secrets.DEPLOY_SERVER_USERNAME }}
+        privateKey: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
+        port: ${{ secrets.DEPLOY_SERVER_PORT }}
+        
+    - name: Run staging
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: docker compose -p stage -f 3dconvad/docker-compose.stage.yml up -d
+        host: ${{ secrets.DEPLOY_SERVER_HOST }}
+        username: ${{ secrets.DEPLOY_SERVER_USERNAME }}
+        privateKey: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
+        port: ${{ secrets.DEPLOY_SERVER_PORT }}
+        
+ Test:
+  runs-on: self-hosted
+  needs: Staging
+  steps:
+    - uses: actions/checkout@v3
+    - uses: matt-ball/newman-action@master
+      with:
+        collection: 3dConvAD.postman_collection.json
+        environment: 3dConvAD.postman_environment.json
+        
+ Deploy:
+  runs-on: self-hosted
+  needs: Test
+  steps:
+    - name: Kill Staging server
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: docker compose -p stage -f 3dconvad/docker-compose.stage.yml down --remove-orphans
+        host: ${{ secrets.DEPLOY_SERVER_HOST }}
+        username: ${{ secrets.DEPLOY_SERVER_USERNAME }}
+        privateKey: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
+        port: ${{ secrets.DEPLOY_SERVER_PORT }}
+        
+    - name: Clean old containers
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: docker compose -f 3dconvad/docker-compose.prod.yml down --remove-orphans
+        host: ${{ secrets.DEPLOY_SERVER_HOST }}
+        username: ${{ secrets.DEPLOY_SERVER_USERNAME }}
+        privateKey: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
+        port: ${{ secrets.DEPLOY_SERVER_PORT }}
+        
+    - name: Run new containers
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: docker compose -f 3dconvad/docker-compose.prod.yml up -d
+        host: ${{ secrets.DEPLOY_SERVER_HOST }}
+        username: ${{ secrets.DEPLOY_SERVER_USERNAME }}
+        privateKey: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
+        port: ${{ secrets.DEPLOY_SERVER_PORT }}

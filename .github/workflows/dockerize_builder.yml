@@ -1,0 +1,91 @@
+name: Docker Builder
+
+on:
+  workflow_dispatch:
+
+jobs:
+  
+  dockerize_frontend:
+    runs-on: self-hosted
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Frontend hanged Files
+        uses: tj-actions/changed-files@v34.6.0
+        id: frontend-changed-files
+        with:
+          files: |
+            src/app/frontend/**
+
+      - name: "Check frontend changed files"
+        if: steps.frontend-changed-files.outputs.any_changed == 'false'
+        run: |
+          echo "Frontend files did not change"
+          exit 0
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to Canister.io
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.CANISTER_ADDRESS }}
+          username: ${{ secrets.CANISTER_USERNAME }}
+          password: ${{ secrets.CANISTER_PASSWORD }}
+          
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: src/app/frontend
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            cloud.canister.io:5000/aaurso/frontend:latest
+            valeriolong/frontend:latest
+
+  dockerize_backend:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Backend hanged Files
+        uses: tj-actions/changed-files@v34.6.0
+        id: backend-changed-files
+        with:
+          files: |
+            src/app/backend/**
+
+      - name: "Check backend changed files"
+        if: steps.backend-changed-files.outputs.any_changed == 'false'
+        run: |
+          echo "Backend files did not change"
+          exit 0
+
+      - name: Setup Docker Buildx  
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: src/app/backend
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            valeriolong/backend:latest
+          secrets: |
+            "ML_FLOW_USERNAME=${{ secrets.MLFLOW_TRACKING_USERNAME }}"
+            "ML_FLOW_PASSWORD=${{ secrets.MLFLOW_TRACKING_PASSWORD }}"

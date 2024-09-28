@@ -1,0 +1,51 @@
+name: Issues Checker
+
+on:
+  release:
+  pull_request:
+  # schedule:
+  #   - cron:  '30 5,17 * * *'
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+
+  critical_issues:
+    runs-on: [self-hosted]
+
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Find critical issues
+      id: find-critical-issues
+
+      uses: actions-cool/issues-helper@v3
+      with:
+        actions: 'find-issues'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issue-state: 'open'
+        labels: 'critical'
+
+    - name: Print output
+      run: |
+        echo "Critical issues list ${{ steps.find-critical-issues.outputs.issues }}"
+        
+    - name: Issues not found
+      if: ${{ steps.find-critical-issues.outputs.issues }} == ''
+      run: |
+        echo "There are no critical issues."
+
+    # - name: Make Linux folder
+    #   if: ${{ steps.find-critical-issues.issues }} != '' && runner.os != 'Windows'
+    #   run: |
+    #       mkdir -p logs/$(date)_logs && touch logs/$(date)_logs/log.txt
+
+    # - name: Upload artifact Linux
+    #   if: runner.os != 'Windows'
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #       name: critical_issues-$(date +'%Y-%m-%dT%H:%M:%S')
+    #       path: |
+    #         logs
+    #         !logs/**/*.txt

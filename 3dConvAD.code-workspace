@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.tabCompletion": "on",
+		"diffEditor.codeLens": true,
+		"python.testing.cwd": "tests/data/",
+		"python.testing.pytestEnabled": false,
+		"python.testing.unittestEnabled": false,
+		"docify.programmingLanguage": "python",
+		"docify.intelligentDetection": true,
+		"dvc.dvcPath": "dvc"
+	}
+}

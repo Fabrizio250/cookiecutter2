@@ -1,0 +1,53 @@
+name: Train
+on:
+  pull_request:
+    branches:
+      - dev
+    types:
+      - closed
+  workflow_dispatch:
+  
+env:
+  PYTHON_VERSION: 3.10.9
+  DVC_USER: ${{ secrets.DAGSHUB_USER }}
+  DVC_PWD: ${{ secrets.DAGSHUB_PASSWORD }}
+
+jobs:
+  dvc_setup:
+    runs-on: [self-hosted, x64]
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install DVC
+      run: |
+        pip install dvc dvc[ssh]
+
+    - name: Set Windows variables
+      if: runner.os == 'Windows'
+      run: |
+        echo "The detected OS is Windows"
+        dvc remote modify dagshub user %DVC_USER%
+        dvc remote modify dagshub password %DVC_PWD%
+
+    - name: Set Linux variables
+      if: runner.os == 'Linux'
+      run: |
+        echo "The detected OS is Linux"
+        dvc remote modify dagshub user $DVC_USER
+        dvc remote modify dagshub password $DVC_PWD
+
+    - name: DVC pull
+      run: |
+        dvc pull
+        # dvc pull make_dataset
+
+    - name: Launch train
+      run: |
+          DVC repro train_model

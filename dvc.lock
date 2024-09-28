@@ -1,0 +1,60 @@
+schema: '2.0'
+stages:
+  make_dataset:
+    cmd: python src/data/make_dataset.py data/external/OASIS3_MRI_SESSIONS/ data/external/OASIS3_MRI_FREESURFER/
+      data/processed/ data/raw/clinical-data.csv data/raw/mri-scans.csv
+    deps:
+    - path: data/external/OASIS3_MRI_FREESURFER/
+      md5: 60e57ef6c73b53412b6e2e542f567b65.dir
+      size: 175290243036
+      nfiles: 263272
+    - path: data/external/OASIS3_MRI_SESSIONS/
+      md5: 894b0ceb283c3b7de96abc66831869c9.dir
+      size: 378447808315
+      nfiles: 66836
+    - path: data/raw/clinical-data.csv
+      md5: c4706f62008d9293cd0613f5eca0303c
+      size: 782277
+    - path: data/raw/mri-scans.csv
+      md5: 1fcf29e3cc58b643910d4726d12aa6eb
+      size: 198015
+    - path: src/data/make_dataset.py
+      md5: d4404eb015f38da882b083ecc9e5d59d
+      size: 7617
+    outs:
+    - path: data/processed/clinical-mr-full.csv
+      md5: 1c5a985499c892cd1454a5aabb342d4f
+      size: 1049519
+    - path: data/processed/clinical-mr.csv
+      md5: 02d854ee9bdce5ce27598c1707694e40
+      size: 453000
+    - path: data/processed/data/
+      md5: da6020f788b23f524f674ac9b4a726fe.dir
+      size: 3060026741
+      nfiles: 2093
+    - path: data/processed/invalid-sessions.csv
+      md5: 08b9aa3c375b7d5820cceb5a6df5c184
+      size: 877
+  train_model:
+    cmd: python -m src.models.train_model --diagnosis_dict data/raw/clinical-map.json
+      --clinical_data data/processed/clinical-mr-full.csv --data_folder data/processed/data/
+      --max_epochs 1 --seed 42 --batch_size 1 --precision 16 --accumulate_grad_batches
+      8 --mlflow_uri https://dagshub.com/v.longo20/3dConvAD.mlflow
+    deps:
+    - path: data/processed/clinical-mr-full.csv
+      md5: 1c5a985499c892cd1454a5aabb342d4f
+      size: 1049519
+    - path: data/processed/data/
+      md5: da6020f788b23f524f674ac9b4a726fe.dir
+      size: 3060026741
+      nfiles: 2093
+    - path: data/raw/clinical-map.json
+      md5: 16e542c79703ff9b8cd5dc862951b671
+      size: 3240
+    - path: src/models/train_model.py
+      md5: 5ceeaf92fa260100b40b29fe284a58d3
+      size: 7135
+    outs:
+    - path: models/model.ckpt
+      md5: cdd99106321549e64bacd41661c31811
+      size: 71280652

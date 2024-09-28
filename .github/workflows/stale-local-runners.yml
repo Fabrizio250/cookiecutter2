@@ -1,0 +1,57 @@
+# This workflow warns and then closes issues and PRs that have had no activity for a specified amount of time.
+
+name: Mark stale issues and pull requests
+
+on:
+  schedule:
+  - cron: '39 3 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  stale:
+
+    runs-on: self-hosted
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+    - name: Mark stale issues and PR
+      uses: actions/stale@v6.0.1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: "This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions."
+        # The message to post on the pull request when tagging it. If none provided, will not mark pull requests stale.
+        stale-pr-message: "This pull request has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions."
+        stale-issue-label: inactive,
+        stale-pr-label: inactive,
+
+    - name: Close Stale Issues
+      uses: actions/stale@v6.0.1
+      with:
+        # The message to post on the issue when closing it. If none provided, will not comment when closing an issue.
+        close-issue-message: "This issue has been automatically closed because it has not had recent activity. Thank you for your contributions."
+        # The message to post on the pull request when closing it. If none provided, will not comment when closing a pull requests.
+        close-pr-message: "This pull request has been automatically closed because it has not had recent activity. Thank you for your contributions."
+        # The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.
+        # The number of days old an issue can be before marking it stale. Set to -1 to never mark issues as stale automatically. Override "days-before-stale" option regarding only the issues.
+        days-before-issue-stale: 15,
+        # The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.
+        days-before-pr-stale: 30,
+        # The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.
+        # The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.
+        days-before-issue-close: 5,
+        # The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.
+        days-before-pr-close: 10,
+        exempt-issue-labels: pinned,critical,urgent,important,
+        close-issue-reason:  not_planned
+        stale-issue-label: closed, inactive,
+        close-pr-label: closed, inactive,
+        exempt-pr-labels: pinned,critical,urgent,important,fixed,fix,
+        # The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).
+        operations-per-run: 10,
+        # Run the processor in debug mode without actually performing any operations on live issues.
+        debug-only: true,
+        delete-branch: # optional, default is false
+        exempt-draft-pr: true,

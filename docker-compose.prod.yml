@@ -1,0 +1,57 @@
+services:
+  redis:
+    image: "redis"
+    platform: linux/arm64
+    volumes:
+      - /data/redis:/data
+    restart: always
+    command:
+      - "--save 60 1"
+      - "--loglevel warning"
+
+  gateway:
+    image: "prom/pushgateway"
+    restart: always
+
+  node:
+    image: "prom/node-exporter"
+    restart: always
+
+  frontend:
+    image: valeriolong/frontend
+    platform: linux/arm64
+    restart: always
+    environment:
+      - API_URL=http://api.3dconvad.trendatre3.duckdns.org/
+    ports:
+      - "5000:5000"
+
+  backend:
+    image: valeriolong/backend
+    platform: linux/arm64
+    restart: always
+    depends_on:
+      - redis
+      - gateway
+    ports:
+      - "8000:8000"
+    volumes:
+      - /data:/data
+
+  flower:
+    image: mher/flower
+    platform: linux/arm64
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+
+  prometheus:
+    image: prom/prometheus
+    platform: linux/arm64
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/:/etc/prometheus/

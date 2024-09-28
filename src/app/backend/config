@@ -1,0 +1,7 @@
+[MLFLOW]
+tracking_uri = https://dagshub.com/v.longo20/3dConvAD.mlflow
+username = this should be set in config.local
+password = as above
+
+[ARTIFACT]
+artifact_uri = mlflow-artifacts:/4bdf1449ee35467da4fa3f78a15250e7/d94fae52ed484c81be6513fc934b8266/artifacts/restored_model_checkpoint/mri_classifier-epoch=31-val_loss=0.69.ckpt
