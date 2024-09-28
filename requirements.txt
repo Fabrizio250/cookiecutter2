@@ -34,5 +34,4 @@ user-agents
 nibabel
 ua-parser
 locust
-clinical
 prometheus-instrumentator
