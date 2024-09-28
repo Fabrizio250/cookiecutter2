@@ -206,7 +206,6 @@ def get_package_info(package_name):
             'Verification Reasoning': 'N/A'
         }
     except importlib.metadata.PackageNotFoundError:
-        # Se il pacchetto non è installato, proviamo a raccogliere informazioni da PyPI
         programming_language = detect_programming_language(package_name)
         software_system = fetch_software_system_from_pypi(package_name)
         last_verified_at = get_last_verified_at_from_pypi(package_name)
@@ -223,7 +222,7 @@ def get_package_info(package_name):
             'Verification Reasoning': 'unknown'
         }
     except Exception as e:
-        # Gestire altri errori e continuare
+        # Gestire altri errori
         print(f"Errore durante il recupero delle informazioni per {package_name}: {e}")
         info = {
             'ID': 'unknown',
